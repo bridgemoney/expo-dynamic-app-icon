@@ -19,10 +19,10 @@ object SharedObject {
 
 class ExpoDynamicAppIconReactActivityLifecycleListener : ReactActivityLifecycleListener {
 
-  override fun onPause(activity: Activity) {
+  fun cleanUp() {
     SharedObject.classesToKill.forEach{ cls ->
       if(SharedObject.pm != null){
-        
+
         if(cls != SharedObject.icon){
           SharedObject.pm?.setComponentEnabledSetting(
             ComponentName(SharedObject.packageName, cls),
@@ -34,5 +34,17 @@ class ExpoDynamicAppIconReactActivityLifecycleListener : ReactActivityLifecycleL
     }
 
     SharedObject.classesToKill.clear()
+  }
+
+  override fun onPause(activity: Activity) {
+    cleanUp()
+  }
+
+  override fun onDestroy(activity: Activity) {
+    cleanUp()
+  }
+
+  override fun onStop(activity: Activity) {
+    cleanUp()
   }
 }
