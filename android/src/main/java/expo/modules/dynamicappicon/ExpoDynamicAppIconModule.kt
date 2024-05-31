@@ -23,12 +23,17 @@ class ExpoDynamicAppIconModule : Module() {
         SharedObject.pm = pm
 
         pm.setComponentEnabledSetting(
+          ComponentName(context.packageName, currentIcon),
+          PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+          PackageManager.DONT_KILL_APP
+        )
+
+        pm.setComponentEnabledSetting(
           ComponentName(context.packageName, newIcon),
           PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
           PackageManager.DONT_KILL_APP
         )
 
-        SharedObject.classesToKill.add(currentIcon)
         SharedObject.icon = newIcon
 
         return@Function name
@@ -43,7 +48,7 @@ class ExpoDynamicAppIconModule : Module() {
       var componentClass:String = currentActivity.getComponentName().getClassName()
 
       var currentIcon:String = if(!SharedObject.icon.isEmpty()) SharedObject.icon else componentClass
-      
+
       var currentIconName:String = currentIcon.split("MainActivity")[1]
 
       return@Function if(currentIconName.isEmpty()) "DEFAULT" else currentIconName
@@ -52,7 +57,7 @@ class ExpoDynamicAppIconModule : Module() {
 
   private val context: Context
     get() = requireNotNull(appContext.reactContext) { "React Application Context is null" }
-  
+
   private val currentActivity
     get() = requireNotNull(appContext.activityProvider?.currentActivity)
 
