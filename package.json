@@ -41,6 +41,7 @@
     "@types/react-native": "^0.70.6",
     "expo-module-scripts": "^3.5.2",
     "expo-modules-core": "^1.12.12",
+    "prettier": "^3.2.5",
     "release-it": "^17.3.0"
   },
   "peerDependencies": {
@@ -64,5 +65,12 @@
         "preset": "angular"
       }
     }
+  },
+  "prettier": {
+    "quoteProps": "consistent",
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "useTabs": false
   }
 }
