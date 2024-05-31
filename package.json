@@ -1,6 +1,6 @@
 {
-  "name": "expo-dynamic-app-icon",
-  "version": "1.2.0",
+  "name": "@bridgemoney/expo-dynamic-app-icon",
+  "version": "1.2.1",
   "description": "Programmatically change the app icon in Expo.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -14,7 +14,8 @@
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "open -a \"Xcode\" example/ios",
-    "open:android": "open -a \"Android Studio\" example/android"
+    "open:android": "open -a \"Android Studio\" example/android",
+    "release": "release-it"
   },
   "keywords": [
     "react-native",
@@ -22,24 +23,46 @@
     "expo-dynamic-app-icon",
     "ExpoDynamicAppIcon"
   ],
-  "repository": "https://github.com/outsung/expo-dynamic-app-icon",
+  "repository": "https://github.com/bridgemoney/expo-dynamic-app-icon",
   "bugs": {
-    "url": "https://github.com/outsung/expo-dynamic-app-icon/issues"
+    "url": "https://github.com/bridgemoney/expo-dynamic-app-icon/issues"
   },
-  "author": "Junseo Oh <insung9546@gmail.com> (https://github.com/outsung)",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/bridgemoney"
+  },
+  "author": "Mikhail Chachkouski <doctorrokter@gmail.com> (https://github.com/doctorrokter)",
   "license": "MIT",
-  "homepage": "https://github.com/outsung/expo-dynamic-app-icon#readme",
+  "homepage": "https://github.com/bridgemoney/expo-dynamic-app-icon#readme",
   "dependencies": {},
   "devDependencies": {
     "@expo/image-utils": "^0.5.1",
+    "@release-it/conventional-changelog": "^8.0.1",
     "@types/react": "^18.0.25",
     "@types/react-native": "^0.70.6",
     "expo-module-scripts": "^3.5.2",
-    "expo-modules-core": "^1.12.12"
+    "expo-modules-core": "^1.12.12",
+    "release-it": "^17.3.0"
   },
   "peerDependencies": {
     "expo": ">=49",
     "react": "*",
     "react-native": "*"
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}"
+    },
+    "npm": {
+      "publish": true
+    },
+    "github": {
+      "release": true
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "angular"
+      }
+    }
   }
 }
