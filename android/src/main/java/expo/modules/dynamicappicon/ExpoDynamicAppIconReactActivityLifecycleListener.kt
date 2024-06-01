@@ -19,54 +19,28 @@ object SharedObject {
 
 class ExpoDynamicAppIconReactActivityLifecycleListener : ReactActivityLifecycleListener {
 
-  override fun onPause(activity: Activity) {
-      SharedObject.classesToKill.forEach{ cls ->
-        if(SharedObject.pm != null){
+  fun cleanUp() {
+    SharedObject.classesToKill.forEach{ cls ->
+      if(SharedObject.pm != null) {
 
-          if(cls != SharedObject.icon){
-            SharedObject.pm?.setComponentEnabledSetting(
-              ComponentName(SharedObject.packageName, cls),
-              PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-              PackageManager.DONT_KILL_APP
-            )
-          }
+        if (cls != SharedObject.icon) {
+          SharedObject.pm?.setComponentEnabledSetting(
+            ComponentName(SharedObject.packageName, cls),
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+          )
         }
       }
-
-      SharedObject.classesToKill.clear()
     }
+
+    SharedObject.classesToKill.clear()
+  }
+
+  override fun onPause(activity: Activity) {
+    cleanUp()
+  }
 
   override fun onDestroy(activity: Activity) {
-      SharedObject.classesToKill.forEach{ cls ->
-        if(SharedObject.pm != null){
-
-          if(cls != SharedObject.icon){
-            SharedObject.pm?.setComponentEnabledSetting(
-              ComponentName(SharedObject.packageName, cls),
-              PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-              PackageManager.DONT_KILL_APP
-            )
-          }
-        }
-      }
-
-      SharedObject.classesToKill.clear()
-    }
-
-  override fun onStop(activity: Activity) {
-      SharedObject.classesToKill.forEach{ cls ->
-        if(SharedObject.pm != null){
-
-          if(cls != SharedObject.icon){
-            SharedObject.pm?.setComponentEnabledSetting(
-              ComponentName(SharedObject.packageName, cls),
-              PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-              PackageManager.DONT_KILL_APP
-            )
-          }
-        }
-      }
-
-      SharedObject.classesToKill.clear()
-    }
+    cleanUp()
+  }
 }

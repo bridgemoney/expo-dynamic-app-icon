@@ -41,8 +41,6 @@ class ExpoDynamicAppIconModule : Module() {
       } catch (e: Exception) {
         return@Function false
       }
-
-      return@Function false
     }
 
     Function("getAppIcon") {
