@@ -22,11 +22,7 @@ class ExpoDynamicAppIconModule : Module() {
         SharedObject.packageName = context.packageName
         SharedObject.pm = pm
 
-        pm.setComponentEnabledSetting(
-          ComponentName(context.packageName, currentIcon),
-          PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-          PackageManager.DONT_KILL_APP
-        )
+        cleanUp()
 
         pm.setComponentEnabledSetting(
           ComponentName(context.packageName, newIcon),
@@ -63,4 +59,7 @@ class ExpoDynamicAppIconModule : Module() {
   private val pm
     get() = requireNotNull(currentActivity.packageManager)
 
+  private fun cleanUp() {
+
+  }
 }

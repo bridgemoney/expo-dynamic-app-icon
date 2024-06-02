@@ -8,41 +8,40 @@ import {
   withAndroidManifest,
   AndroidConfig,
   AndroidManifest,
-} from "@expo/config-plugins";
-import { generateImageAsync } from "@expo/image-utils";
-import fs from "fs";
-import path from "path";
+} from '@expo/config-plugins';
+import { mergeContents } from '@expo/config-plugins/build/utils/generateCode';
+import { generateImageAsync } from '@expo/image-utils';
+import fs from 'fs';
+import path from 'path';
 // @ts-ignore
-import pbxFile from "xcode/lib/pbxFile";
+import pbxFile from 'xcode/lib/pbxFile';
 
-const {
-  getMainApplicationOrThrow,
-  getMainActivityOrThrow,
-} = AndroidConfig.Manifest;
+const { getMainApplicationOrThrow, getMainActivityOrThrow } =
+  AndroidConfig.Manifest;
 
-const androidFolderPath = ["app", "src", "main", "res"];
+const androidFolderPath = ['app', 'src', 'main', 'res'];
 const androidFolderNames = [
-  "mipmap-hdpi",
-  "mipmap-mdpi",
-  "mipmap-xhdpi",
-  "mipmap-xxhdpi",
-  "mipmap-xxxhdpi",
+  'mipmap-hdpi',
+  'mipmap-mdpi',
+  'mipmap-xhdpi',
+  'mipmap-xxhdpi',
+  'mipmap-xxxhdpi',
 ];
 const androidSize = [162, 108, 216, 324, 432];
 
-const iosFolderName = "DynamicAppIcons";
+const iosFolderName = 'DynamicAppIcons';
 const iosSize = 60;
 const ipad152Scale = 2.53;
 const ipad167Scale = 2.78;
 const iosScales = [2, 3, ipad152Scale, ipad167Scale];
 
-type Platform = "ios" | "android";
+type Platform = 'ios' | 'android';
 
-type Icon = { 
-  image: string; 
-  prerendered?: boolean, 
-  platforms?: Platform[]
-}
+type Icon = {
+  image: string;
+  prerendered?: boolean;
+  platforms?: Platform[];
+};
 
 type IconSet = Record<string, Icon>;
 
@@ -59,7 +58,7 @@ function arrayToImages(images: string[]) {
 
 const findIconsForPlatform = (icons: IconSet, platform: Platform) => {
   return Object.keys(icons)
-    .filter(key => {
+    .filter((key) => {
       const icon = icons[key];
       if (icon.platforms) {
         return icon['platforms'].includes(platform);
@@ -67,7 +66,7 @@ const findIconsForPlatform = (icons: IconSet, platform: Platform) => {
       return true;
     })
     .reduce((prev, curr) => ({ ...prev, [curr]: icons[curr] }), {});
-}
+};
 
 const withDynamicIcon: ConfigPlugin<string[] | IconSet | void> = (
   config,
@@ -75,7 +74,7 @@ const withDynamicIcon: ConfigPlugin<string[] | IconSet | void> = (
 ) => {
   const _props = props || {};
 
-  let prepped: Props["icons"] = {};
+  let prepped: Props['icons'] = {};
 
   if (Array.isArray(_props)) {
     prepped = arrayToImages(_props);
@@ -83,19 +82,20 @@ const withDynamicIcon: ConfigPlugin<string[] | IconSet | void> = (
     prepped = _props;
   }
 
-  const iOSIcons = findIconsForPlatform(prepped, "ios");
+  const iOSIcons = findIconsForPlatform(prepped, 'ios');
   const iOSIconsLength = Object.keys(iOSIcons).length;
   if (iOSIconsLength > 0) {
     config = withIconXcodeProject(config, { icons: iOSIcons });
     config = withIconInfoPlist(config, { icons: iOSIcons });
     config = withIconIosImages(config, { icons: iOSIcons });
   }
-  const androidIcons = findIconsForPlatform(prepped, "android");
+  const androidIcons = findIconsForPlatform(prepped, 'android');
   const androidIconsLength = Object.keys(androidIcons).length;
   if (androidIconsLength > 0) {
     config = withIconAndroidManifest(config, { icons: androidIcons });
     config = withIconAndroidImages(config, { icons: androidIcons });
-  } 
+    config = withIconAndroidModuleFile(config, { icons: androidIcons });
+  }
 
   return config;
 };
@@ -113,47 +113,100 @@ const withIconAndroidManifest: ConfigPlugin<Props> = (config, { icons }) => {
       return [
         ...config,
         ...iconNames.map((iconName) => ({
-          $: {
-            "android:name": `${iconNamePrefix}${iconName}`,
-            "android:enabled": "false",
-            "android:exported": "true",
-            "android:icon": `@mipmap/${iconName}`,
-            "android:targetActivity": ".MainActivity",
+          '$': {
+            'android:name': `${iconNamePrefix}${iconName}`,
+            'android:enabled': 'false',
+            'android:exported': 'true',
+            'android:icon': `@mipmap/${iconName}`,
+            'android:targetActivity': '.MainActivity',
           },
-          "intent-filter": [...mainActivity["intent-filter"] || [
-            {
-              action: [{ $: { "android:name": "android.intent.action.MAIN" } }],
-              category: [
-                { $: { "android:name": "android.intent.category.LAUNCHER" } },
-              ],
-            },
-          ]]
+          'intent-filter': [
+            ...(mainActivity['intent-filter'] || [
+              {
+                action: [
+                  { $: { 'android:name': 'android.intent.action.MAIN' } },
+                ],
+                category: [
+                  { $: { 'android:name': 'android.intent.category.LAUNCHER' } },
+                ],
+              },
+            ]),
+          ],
         })),
       ];
     }
     function removeIconActivityAlias(config: any[]): any[] {
       return config.filter(
         (activityAlias) =>
-          !(activityAlias.$["android:name"] as string).startsWith(
+          !(activityAlias.$['android:name'] as string).startsWith(
             iconNamePrefix
           )
       );
     }
 
-    mainApplication["activity-alias"] = removeIconActivityAlias(
-      mainApplication["activity-alias"] || []
+    mainApplication['activity-alias'] = removeIconActivityAlias(
+      mainApplication['activity-alias'] || []
     );
-    mainApplication["activity-alias"] = addIconActivityAlias(
-      mainApplication["activity-alias"] || []
+    mainApplication['activity-alias'] = addIconActivityAlias(
+      mainApplication['activity-alias'] || []
     );
 
     return config;
   });
 };
 
+const withIconAndroidModuleFile: ConfigPlugin<Props> = (config, { icons }) => {
+  return withDangerousMod(config, [
+    'android',
+    async (config) => {
+      const newConfig = { ...config };
+      const iconNamePrefix = `${newConfig.android!.package}.MainActivity`;
+      const iconNames = Object.keys(icons);
+      let listStr = '"';
+      iconNames.forEach((value: string, index: number) => {
+        if (index === iconNames.length - 1) {
+          listStr += value + '"';
+        } else if (index !== 0) {
+          listStr += value + '","';
+        }
+      });
+
+      const filePath = path.join(
+        process.cwd(),
+        '/node_modules/@bridgemoney/expo-dynamic-app-icon/android/src/main/java/expo/modules/dynamicappicon/ExpoDynamicAppIconModule.kt'
+      );
+
+      const moduleKt: string = fs.readFileSync(filePath, 'utf-8');
+      const moduleCode: string = `
+        val list: List<String> = listOf(${listStr})
+        list.forEach{ icon ->
+          pm.setComponentEnabledSetting(
+            ComponentName(context.packageName, context.packageName + ".MainActivity" + icon),
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+          )
+        }
+      `;
+
+      const addCode = mergeContents({
+        tag: 'withCleanUp',
+        src: moduleKt,
+        newSrc: moduleCode,
+        anchor: new RegExp('private fun cleanUp', 'i'),
+        offset: 1,
+        comment: '#',
+      });
+
+      fs.writeFileSync(filePath, addCode.contents);
+
+      return newConfig;
+    },
+  ]);
+};
+
 const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
   return withDangerousMod(config, [
-    "android",
+    'android',
     async (config) => {
       const androidResPath = path.join(
         config.modRequest.platformProjectRoot,
@@ -166,7 +219,7 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
 
           const files = await fs.promises.readdir(folder).catch(() => []);
           for (let j = 0; files.length > j; j += 1) {
-            if (!files[j].startsWith("ic_launcher")) {
+            if (!files[j].startsWith('ic_launcher')) {
               await fs.promises
                 .rm(path.join(folder, files[j]), { force: true })
                 .catch(() => null);
@@ -174,6 +227,7 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
           }
         }
       };
+
       const addIconRes = async () => {
         for (let i = 0; androidFolderNames.length > i; i += 1) {
           const size = androidSize[i];
@@ -185,14 +239,14 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
             const { source } = await generateImageAsync(
               {
                 projectRoot: config.modRequest.projectRoot,
-                cacheType: "react-native-dynamic-app-icon",
+                cacheType: 'react-native-dynamic-app-icon',
               },
               {
                 name: fileName,
                 src: image,
                 // removeTransparency: true,
-                backgroundColor: "#ffffff",
-                resizeMode: "cover",
+                backgroundColor: '#ffffff',
+                resizeMode: 'cover',
                 width: size,
                 height: size,
               }
@@ -203,15 +257,6 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
             );
           }
         }
-        // for (const size of ) {
-        //   // size
-        //   const iconFileName = "";
-        //   const fileName = path.join(iosFolderName, iconFileName);
-        //   const outputPath = path.join(iosRoot, fileName);
-
-        //   const scaledSize = scale * iosSize;
-
-        // }
       };
 
       await removeIconRes();
@@ -224,14 +269,13 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
 
 // for ios
 function getIconName(name: string, size: number, scale?: number) {
-  
   const fileName = `${name}-Icon-$${size}x${size}`;
 
   if (scale != null) {
-    if(scale == ipad152Scale){
+    if (scale == ipad152Scale) {
       return `${fileName}@2x~ipad.png`;
     }
-    if(scale == ipad167Scale){
+    if (scale == ipad167Scale) {
       return `${fileName}@3x~ipad.png`;
     }
     return `${fileName}@${scale}x.png`;
@@ -251,19 +295,19 @@ const withIconXcodeProject: ConfigPlugin<Props> = (config, { icons }) => {
 
     // Unlink old assets
 
-    const groupId = Object.keys(project.hash.project.objects["PBXGroup"]).find(
+    const groupId = Object.keys(project.hash.project.objects['PBXGroup']).find(
       (id) => {
-        const _group = project.hash.project.objects["PBXGroup"][id];
+        const _group = project.hash.project.objects['PBXGroup'][id];
         return _group.name === group.name;
       }
     );
-    if (!project.hash.project.objects["PBXVariantGroup"]) {
-      project.hash.project.objects["PBXVariantGroup"] = {};
+    if (!project.hash.project.objects['PBXVariantGroup']) {
+      project.hash.project.objects['PBXVariantGroup'] = {};
     }
     const variantGroupId = Object.keys(
-      project.hash.project.objects["PBXVariantGroup"]
+      project.hash.project.objects['PBXVariantGroup']
     ).find((id) => {
-      const _group = project.hash.project.objects["PBXVariantGroup"][id];
+      const _group = project.hash.project.objects['PBXVariantGroup'][id];
       return _group.name === group.name;
     });
 
@@ -308,7 +352,7 @@ const withIconXcodeProject: ConfigPlugin<Props> = (config, { icons }) => {
             verbose: true,
           });
         } else {
-          console.log("Skipping duplicate: ", iconFileName);
+          console.log('Skipping duplicate: ', iconFileName);
         }
       }
     });
@@ -337,7 +381,7 @@ const withIconInfoPlist: ConfigPlugin<Props> = (config, { icons }) => {
 
     function applyToPlist(key: string) {
       if (
-        typeof config.modResults[key] !== "object" ||
+        typeof config.modResults[key] !== 'object' ||
         Array.isArray(config.modResults[key]) ||
         !config.modResults[key]
       ) {
@@ -349,13 +393,13 @@ const withIconInfoPlist: ConfigPlugin<Props> = (config, { icons }) => {
 
       // @ts-expect-error
       config.modResults[key].CFBundlePrimaryIcon = {
-        CFBundleIconFiles: ["AppIcon"],
+        CFBundleIconFiles: ['AppIcon'],
       };
     }
 
     // Apply for both tablet and phone support
-    applyToPlist("CFBundleIcons");
-    applyToPlist("CFBundleIcons~ipad");
+    applyToPlist('CFBundleIcons');
+    applyToPlist('CFBundleIcons~ipad');
 
     return config;
   });
@@ -363,7 +407,7 @@ const withIconInfoPlist: ConfigPlugin<Props> = (config, { icons }) => {
 
 const withIconIosImages: ConfigPlugin<Props> = (config, props) => {
   return withDangerousMod(config, [
-    "ios",
+    'ios',
     async (config) => {
       await createIconsAsync(config, props);
       return config;
@@ -399,14 +443,14 @@ async function createIconsAsync(
       const { source } = await generateImageAsync(
         {
           projectRoot: config.modRequest.projectRoot,
-          cacheType: "react-native-dynamic-app-icon",
+          cacheType: 'react-native-dynamic-app-icon',
         },
         {
           name: iconFileName,
           src: icon.image,
           removeTransparency: true,
-          backgroundColor: "#ffffff",
-          resizeMode: "cover",
+          backgroundColor: '#ffffff',
+          resizeMode: 'cover',
           width: scaledSize,
           height: scaledSize,
         }
