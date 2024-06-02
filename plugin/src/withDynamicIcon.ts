@@ -194,7 +194,7 @@ const withIconAndroidModuleFile: ConfigPlugin<Props> = (config, { icons }) => {
         newSrc: moduleCode,
         anchor: new RegExp('private fun cleanUp', 'i'),
         offset: 1,
-        comment: '#',
+        comment: '//',
       });
 
       fs.writeFileSync(filePath, addCode.contents);
