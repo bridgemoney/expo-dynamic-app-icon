@@ -1,6 +1,6 @@
 {
   "name": "@bridgemoney/expo-dynamic-app-icon",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Programmatically change the app icon in Expo.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
