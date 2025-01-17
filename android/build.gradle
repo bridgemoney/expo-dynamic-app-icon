@@ -22,7 +22,7 @@ buildscript {
     if (ext.has("kotlinVersion")) {
       ext.kotlinVersion()
     } else {
-      ext.safeExtGet("kotlinVersion", "1.8.10")
+      ext.safeExtGet("kotlinVersion", "1.9.24")
     }
   }
 
@@ -57,17 +57,17 @@ android {
   def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
   if (agpVersion.tokenize('.')[0].toInteger() < 8) {
     compileOptions {
-      sourceCompatibility JavaVersion.VERSION_11
-      targetCompatibility JavaVersion.VERSION_11
+      sourceCompatibility JavaVersion.VERSION_21
+      targetCompatibility JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_11.majorVersion
+      jvmTarget = JavaVersion.VERSION_21.majorVersion
     }
   }
 
   defaultConfig {
-    minSdkVersion safeExtGet("minSdkVersion", 23)
+    minSdkVersion safeExtGet("minSdkVersion", 24)
     targetSdkVersion safeExtGet("targetSdkVersion", 34)
     versionCode 1
     versionName "0.1.0"
