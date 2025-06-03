@@ -17,14 +17,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.dynamicappicon.example"
+      "bundleIdentifier": "co.bridgemoney.dynamicappicon.example"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "expo.modules.dynamicappicon.example"
+      "package": "co.bridgemoney.dynamicappicon.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"
