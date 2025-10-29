@@ -1,11 +1,9 @@
 package expo.modules.dynamicappicon
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.Context
 import android.content.pm.PackageManager;
-import android.content.Intent;
 import android.content.ComponentName;
+import android.util.Log
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -14,10 +12,10 @@ class ExpoDynamicAppIconModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ExpoDynamicAppIcon")
 
-    Function("setAppIcon") { name: String ->
+    AsyncFunction("setAppIcon") { name: String ->
       try {
-        var newIcon:String = context.packageName + ".MainActivity" + name
-        var currentIcon:String = if(!SharedObject.icon.isEmpty()) SharedObject.icon else context.packageName + ".MainActivity"
+        val newIcon:String = context.packageName + ".MainActivity" + name
+        val currentIcon:String = if(!SharedObject.icon.isEmpty()) SharedObject.icon else context.packageName + ".MainActivity"
 
         SharedObject.packageName = context.packageName
         SharedObject.pm = pm
@@ -39,20 +37,28 @@ class ExpoDynamicAppIconModule : Module() {
         SharedObject.classesToKill.add(currentIcon)
         SharedObject.icon = newIcon
 
-        return@Function name
+        return@AsyncFunction name
       } catch (e: Exception) {
-        return@Function false
+        Log.e("ExpoDynamicAppIcon", e.message, e)
+        return@AsyncFunction false
       }
     }
 
-    Function("getAppIcon") {
-      var componentClass:String = currentActivity.getComponentName().getClassName()
+    AsyncFunction("getAppIcon") {
+      try {
+        val componentClass:String = currentActivity.getComponentName().getClassName()
+        val currentIcon:String = if(!SharedObject.icon.isEmpty()) SharedObject.icon else componentClass
+        val currentIconName:String = currentIcon.split("MainActivity")[1]
 
-      var currentIcon:String = if(!SharedObject.icon.isEmpty()) SharedObject.icon else componentClass
+        if (currentIconName.isEmpty()) {
+          return@AsyncFunction "DEFAULT"
+        }
 
-      var currentIconName:String = currentIcon.split("MainActivity")[1]
-
-      return@Function if(currentIconName.isEmpty()) "DEFAULT" else currentIconName
+        return@AsyncFunction currentIconName
+      } catch (e: Exception) {
+        Log.e("ExpoDynamicAppIcon", e.message, e)
+        return@AsyncFunction "DEFAULT"
+      }
     }
   }
 
