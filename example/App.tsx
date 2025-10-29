@@ -1,4 +1,4 @@
-import { Button, Text, View } from 'react-native';
+import { Button, Platform, Text, View } from 'react-native';
 
 import ExpoDynamicAppIconModule from 'expo-dynamic-app-icon';
 import { useState } from 'react';
@@ -6,8 +6,22 @@ import { useState } from 'react';
 export default function App() {
   const [iconName, setIconName] = useState<string>();
 
-  async function updateIcon(icon: string) {
-    await ExpoDynamicAppIconModule.setAppIcon(icon);
+  function updateIcon(icon: string) {
+    if (Platform.OS === 'ios') {
+      ExpoDynamicAppIconModule.setAppIconIOS(icon);
+    } else {
+      ExpoDynamicAppIconModule.setAppIconAndroidAsync(icon);
+    }
+  }
+
+  function updateIconName() {
+    if (Platform.OS === 'ios') {
+      setIconName(ExpoDynamicAppIconModule.getAppIconIOS());
+    } else {
+      ExpoDynamicAppIconModule.getAppIconAndroidAsync().then((icon: string) => {
+        setIconName(icon);
+      });
+    }
   }
 
   return (
@@ -20,12 +34,7 @@ export default function App() {
       }}
     >
       <View style={{ marginBottom: 16 }}>
-        <Button
-          title="get icon!"
-          onPress={async () =>
-            setIconName(await ExpoDynamicAppIconModule.getAppIcon())
-          }
-        />
+        <Button title="get icon!" onPress={updateIconName} />
         <Text>{iconName || 'Press Button!'}</Text>
       </View>
 

@@ -12,7 +12,7 @@ class ExpoDynamicAppIconModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ExpoDynamicAppIcon")
 
-    AsyncFunction("setAppIcon") { name: String ->
+    AsyncFunction("setAppIconAndroidAsync") { name: String ->
       try {
         val newIcon:String = context.packageName + ".MainActivity" + name
         val currentIcon:String = if(!SharedObject.icon.isEmpty()) SharedObject.icon else context.packageName + ".MainActivity"
@@ -44,7 +44,7 @@ class ExpoDynamicAppIconModule : Module() {
       }
     }
 
-    AsyncFunction("getAppIcon") {
+    AsyncFunction("getAppIconAndroidAsync") {
       try {
         val componentClass:String = currentActivity.getComponentName().getClassName()
         val currentIcon:String = if(!SharedObject.icon.isEmpty()) SharedObject.icon else componentClass
