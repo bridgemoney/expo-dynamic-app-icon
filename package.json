@@ -1,6 +1,6 @@
 {
   "name": "@bridgemoney/expo-dynamic-app-icon",
-  "version": "1.4.0",
+  "version": "1.5.1",
   "description": "Programmatically change the app icon in Expo.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -35,16 +35,16 @@
   "homepage": "https://github.com/bridgemoney/expo-dynamic-app-icon#readme",
   "dependencies": {},
   "devDependencies": {
-    "@types/react": "~19.0.0",
-    "@expo/image-utils": "^0.5.1",
+    "@types/react": "~19.2.2",
+    "@expo/image-utils": "^0.8.7",
     "@release-it/conventional-changelog": "^8.0.1",
-    "expo-modules-core": "^1.12.12",
-    "prettier": "^3.4.2",
+    "expo-modules-core": "^3.0.23",
+    "prettier": "^3.6.2",
     "release-it": "^17.3.0",
     "eslint-config-expo": "~9.2.0",
-    "eslint-plugin-prettier": "^5.4.1",
+    "eslint-plugin-prettier": "^5.5.4",
     "expo": "~53.0.0",
-    "expo-module-scripts": "^4.1.6",
+    "expo-module-scripts": "^5.0.7",
     "react-native": "0.79.1"
   },
   "peerDependencies": {

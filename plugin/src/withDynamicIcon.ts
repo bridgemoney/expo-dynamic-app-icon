@@ -7,7 +7,6 @@ import {
   withXcodeProject,
   withAndroidManifest,
   AndroidConfig,
-  AndroidManifest,
 } from '@expo/config-plugins';
 import { mergeContents } from '@expo/config-plugins/build/utils/generateCode';
 import { generateImageAsync } from '@expo/image-utils';
@@ -176,8 +175,9 @@ const withIconAndroidModuleFile: ConfigPlugin<Props> = (config, { icons }) => {
         '/node_modules/@bridgemoney/expo-dynamic-app-icon/android/src/main/java/expo/modules/dynamicappicon/ExpoDynamicAppIconModule.kt'
       );
 
-      const moduleKt: string = fs.readFileSync(filePath, 'utf-8');
-      const moduleCode: string = `
+      if (fs.existsSync(filePath)) {
+        const moduleKt: string = fs.readFileSync(filePath, 'utf-8');
+        const moduleCode: string = `
         val list: List<String> = listOf(${listStr})
         list.forEach{ icon ->
           pm.setComponentEnabledSetting(
@@ -188,16 +188,17 @@ const withIconAndroidModuleFile: ConfigPlugin<Props> = (config, { icons }) => {
         }
       `;
 
-      const addCode = mergeContents({
-        tag: 'withCleanUp',
-        src: moduleKt,
-        newSrc: moduleCode,
-        anchor: new RegExp('private fun cleanUp', 'i'),
-        offset: 1,
-        comment: '//',
-      });
+        const addCode = mergeContents({
+          tag: 'withCleanUp',
+          src: moduleKt,
+          newSrc: moduleCode,
+          anchor: new RegExp('private fun cleanUp', 'i'),
+          offset: 1,
+          comment: '//',
+        });
 
-      fs.writeFileSync(filePath, addCode.contents);
+        fs.writeFileSync(filePath, addCode.contents);
+      }
 
       return newConfig;
     },

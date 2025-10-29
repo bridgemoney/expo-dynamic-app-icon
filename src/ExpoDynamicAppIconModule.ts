@@ -1,5 +1,12 @@
-import { requireNativeModule } from 'expo-modules-core';
+import { NativeModule, requireNativeModule } from 'expo-modules-core';
 
-// It loads the native module object from the JSI or falls back to
-// the bridge module (from NativeModulesProxy) if the remote debugger is on.
-export default requireNativeModule('ExpoDynamicAppIcon');
+declare class ExpoDynamicAppIconModule extends NativeModule {
+  setAppIconIOS(name: string): string | false;
+  setAppIconAndroidAsync(name: string): Promise<string | false>;
+  getAppIconIOS(): string;
+  getAppIconAndroidAsync(): Promise<string>;
+}
+
+export default requireNativeModule<ExpoDynamicAppIconModule>(
+  'ExpoDynamicAppIcon'
+);
